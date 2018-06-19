@@ -1,0 +1,15 @@
+{ 
+    "_id" : ObjectId("5aaf7c2750cb5328345a1864"), 
+    "match" : [
+
+    ], 
+    "userName" : "a", 
+    "password" : "$2a$10$braTl2g3DC5aq1S3wEXRQeZsMFrQMbgAK.z3tr.NNu0zbNLV/CELe", 
+    "birthdate" : ISODate("2018-01-01T00:00:00.000+0000"), 
+    "studentID" : NumberInt(9876543), 
+    "lastName" : "a", 
+    "firstName" : "a", 
+    "phoneNumber" : "0987654321", 
+    "role" : "admin", 
+    "__v" : NumberInt(0)
+}
