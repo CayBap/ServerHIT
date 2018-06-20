@@ -108,14 +108,23 @@ exports.CheckSignUp = (req,res)=>{
 exports.GetUsers =async (req,res)=>{
     var page = req.query.page ? parseInt(req.query.page) : 1
     var limit = req.query.limit ?parseInt(req.query.limit): 10; 
+    let query  = {
+        role:'user'
+    };
+        if(req.query.filter=='false'){
+            query.playId = { $exists: false };
+        }
+        if(req.query.filter=='true'){
+            query.playId = { $exists: true, $ne: null };
+        }
+    
     var options = {
         page,
         limit,
         populate: 'playId' ,
     }
     try {
-        var users = await User.paginate({role:'user'}, options);
-        
+        var users = await User.paginate(query, options);
         res.json({
             code: 1,
             status: "200",
