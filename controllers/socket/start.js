@@ -9,12 +9,13 @@ module.exports = function (socket) {
         switch (data.command) {
             case CONST.RECEIVE.LOGIN.AUTH:
                 var token = data.token;
-
                 if (token) {
                     // verifies secret and checks exp
                     jwt.verify(token, config.get('sercret'), function (err, decoded) {
                         if (err) {
                             socket.emit(CONST.NAMESPACE.AUTH, {
+                               
+                               
                                 code: 2,
                                 message: 'Error: ' + err
                             });

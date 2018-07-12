@@ -11,7 +11,8 @@ const QuestionList = new Schema({
             ref: 'Question'
         },
         point: Number
-    }]
+    }],
+    isRandom:Boolean
 }, {
     collection: 'QuestionList'
 })

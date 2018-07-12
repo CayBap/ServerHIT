@@ -2,42 +2,50 @@ const Question = require('../models/question.model');
 const QuestionList = require('../models/questionList.model');
 
 exports.GetRandomQuestion = async () => {
-    let listQ = await QuestionList.find();
-    let listP = [];
-    let dem = 0;
-    if (listQ != null) {
-        await listQ.forEach(list => {
-            let arr = GetArrRandom(list.usingQuestion, list.questions.length);
-            for (let i = 0; i < list.usingQuestion; i++) {
-                listP.push({
-                    questionId: list.questions[arr[i]].questId,
-                    answered: false
-                });
-            }
-        });
+    try {
+        let listQ = await QuestionList.find();
+        let listP = [];
+        let dem = 0;
+        if (listQ != null) {
+            await listQ.forEach(list => {
+                let arr = GetArrRandom(list.usingQuestion, list.questions.length);
+                for (let i = 0; i < list.usingQuestion; i++) {
+                    listP.push({
+                        questionId: list.questions[arr[i]].questId,
+                        answered: false
+                    });
+                }
+            });
+        }
+        return listP;
+    } catch (err) {
+        return null;
     }
-    return listP;
 }
 let GetArrRandom = (useQues, count) => {
-    let arr = [];
-    while (arr.length < useQues) {
-        let length = arr.length;
-        let number = Math.floor((Math.random() * count) + 1);
-        if (length == 0) {
-            arr.push(number - 1);
-        } else {
-            let dem = 0;
-            for (let i = 0; i < length; i++) {
-                if ((number - 1) != arr[i]) {
-                    dem++;
+    try {
+        let arr = [];
+        while (arr.length < useQues) {
+            let length = arr.length;
+            let number = Math.floor((Math.random() * count) + 1);
+            if (length == 0) {
+                arr.push(number - 1);
+            } else {
+                let dem = 0;
+                for (let i = 0; i < length; i++) {
+                    if ((number - 1) != arr[i]) {
+                        dem++;
+                    }
+                }
+                if (dem == length) {
+                    arr.push(number - 1);
                 }
             }
-            if (dem == length) {
-                arr.push(number - 1);
-            }
         }
+        return arr;
+    } catch (err) {
+        return null;
     }
-    return arr;
 }
 exports.GetQuestions = async (req, res) => {
     var page = req.query.page ? parseInt(req.query.page) : 1
@@ -57,6 +65,24 @@ exports.GetQuestions = async (req, res) => {
 
     } catch (e) {
         console.log(e)
+        res.json({
+            code: 2,
+            status: "400",
+            message: "Lấy  câu hỏi thất bại"
+        })
+    }
+}
+exports.GetQuestionsNotPage = async (req, res) => {
+
+    try {
+        var question = await Question.find();
+        res.json({
+            code: 1,
+            status: "200",
+            data: question
+        })
+
+    } catch (e) {
         res.json({
             code: 2,
             status: "400",
@@ -127,78 +153,75 @@ exports.AddQuestion = async (req, res) => {
             })
         } catch (err) {
             res.json({
-                code:2,
-                status:'400',
-                message:'Thêm mới câu hỏi thất bại.'
+                code: 2,
+                status: '400',
+                message: 'Thêm mới câu hỏi thất bại.'
             });
         }
     }
 }
 
-exports.Delete = async (req,res)=>{
+exports.Delete = async (req, res) => {
     let id = req.params.id;
-    if(id){
-        try{
+    if (id) {
+        try {
             await Question.findByIdAndRemove(id);
             res.json({
-                code:1,
-                status:'200',
-                message:'Xóa câu hỏi thành công'
+                code: 1,
+                status: '200',
+                message: 'Xóa câu hỏi thành công'
             });
-        }
-        catch(err){
+        } catch (err) {
             console.log(err)
             res.json({
-                code:2,
-                status:'400',
-                message:'Xóa câu hỏi thất bại.'
+                code: 2,
+                status: '400',
+                message: 'Xóa câu hỏi thất bại.'
             })
         }
     }
 }
 
-exports.Update =async (req,res)=>{
+exports.Update = async (req, res) => {
     let id = req.params.id;
     let body = req.body;
-    
-    if(id&&body){
+
+    if (id && body) {
         let question = undefined;
-        try{
+        try {
             question = await Question.findById(id);
-        }
-        catch(err){
+        } catch (err) {
             res.json({
-                code:1,
-                status:'400',
-                message:'Không tìm thấy câu hỏi'
+                code: 1,
+                status: '400',
+                message: 'Không tìm thấy câu hỏi'
             });
         }
-        if(question){
-           try{
-            question.content = body.content;
-            // question.image = body.image;
-            // question.video = body.video;
-            // questions.isHtml = body.isHtml;
-            question.options[0].answer = body.answered1;
-            question.options[1].answer = body.answered2;
-            question.options[2].answer = body.answered3;
-            question.options[3].answer = body.answered4;
-            question.correctAnswer = body.correctAnswer;
-            question.score = body.score;
-            let result = await question.save();
-            res.json({
-                code:1,
-                status:'200',
-                data:result
-            });
-           }
-           catch(err){
-            res.json({
-                code:1,
-                status:'400',
-                message:'Cập nhập câu hỏi thất bại'
-            });
-           }
+        if (question) {
+            try {
+                question.content = body.content;
+                // question.image = body.image;
+                // question.video = body.video;
+                // questions.isHtml = body.isHtml;
+                question.options[0].answer = body.answered1;
+                question.options[1].answer = body.answered2;
+                question.options[2].answer = body.answered3;
+                question.options[3].answer = body.answered4;
+                question.correctAnswer = body.correctAnswer;
+                question.score = body.score;
+                let result = await question.save();
+                res.json({
+                    code: 1,
+                    status: '200',
+                    data: result
+                });
+            } catch (err) {
+                res.json({
+                    code: 1,
+                    status: '400',
+                    message: 'Cập nhập câu hỏi thất bại'
+                });
+            }
         }
     }
 }
