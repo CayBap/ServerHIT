@@ -7,7 +7,7 @@
         "host": "localhost",
         "port": "4000"
     },
-    "mongoo": "mongodb://localhost:27017/quiz",
+    "mongoo": "mongodb://localhost:27017/Hitweb",
     "sercret": "dothanglamchohit",
     "state": {
         "success": 1,
