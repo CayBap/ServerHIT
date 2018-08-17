@@ -311,4 +311,3 @@ exports.GetUserById = async(req,res)=>{
         }
     }
 }
-exports.UpdateUser
