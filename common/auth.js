@@ -5,7 +5,6 @@ var config = require('config'); // get our config file
 module.exports = function(req, res, next) {
   // check header or url parameters or post parameters for token
   var token = req.headers['x-access-token'];
-
   // decode token
   if (token) {
     // verifies secret and checks exp

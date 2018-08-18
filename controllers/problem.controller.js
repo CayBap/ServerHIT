@@ -1,30 +1,32 @@
 const Problem = require('../models/problem.model');
-const request = require('request');
-exports.GetRandomProblem =async () => {
+const User = require('../models/user.model');
+const Play = require('../models/play.model');
+const request = require('request-promise');
+exports.GetRandomProblem = async () => {
     let arr = [];
-    let proEasy =await Problem.find({
+    let proEasy = await Problem.find({
         level: '1'
     });
-    let proNomal =await Problem.find({
+    let proNomal = await Problem.find({
         level: '2'
     });
-    let proHard =await Problem.find({
+    let proHard = await Problem.find({
         level: '3'
     });
     arr.push({
-        problemId: proEasy[Math.floor((Math.random() * proEasy.length) )]._id,
+        problemId: proEasy[Math.floor((Math.random() * proEasy.length))]._id,
         correct: false,
-        score : 0
+        score: 0
     });
     arr.push({
-        problemId: proNomal[Math.floor((Math.random() * proNomal.length) )]._id,
+        problemId: proNomal[Math.floor((Math.random() * proNomal.length))]._id,
         correct: false,
-        score : 0
+        score: 0
     });
     arr.push({
-        problemId: proHard[Math.floor((Math.random() * proHard.length) )]._id,
+        problemId: proHard[Math.floor((Math.random() * proHard.length))]._id,
         correct: false,
-        score : 0
+        score: 0
     });
     return arr;
 }
@@ -105,13 +107,13 @@ exports.AddProblem = async (req, res) => {
     if (body) {
         try {
             let score = 0;
-            if(body.level==1){
-                score=20;
+            if (body.level == 1) {
+                score = 20;
             }
-            if(body.level==2){
+            if (body.level == 2) {
                 score = 30;
             }
-            if(body.level==3){
+            if (body.level == 3) {
                 score = 50;
             }
             // body = JSON.parse(body)
@@ -119,19 +121,19 @@ exports.AddProblem = async (req, res) => {
             let problem = new Problem({
                 title: body.title,
                 content: body.content,
-                input:body.input,
-                output:body.output,
-                example:{
-                    input:body.example.input,
-                    output:body.example.output
+                input: body.input,
+                output: body.output,
+                example: {
+                    input: body.example.input,
+                    output: body.example.output
                 },
-                sortName:body.sortName,
-                correctScore:score,
-                level:body.level,
-                timeLimit:body.timeLimit,
-                memoryLimit:body.memoryLimit,
-                language:body.language
-              });
+                sortName: body.sortName,
+                correctScore: score,
+                level: body.level,
+                timeLimit: body.timeLimit,
+                memoryLimit: body.memoryLimit,
+                language: body.language
+            });
             let result = await problem.save();
             res.json({
                 code: 1,
@@ -173,7 +175,7 @@ exports.Delete = async (req, res) => {
 exports.Update = async (req, res) => {
     let id = req.params.id;
     let body = JSON.parse(req.body.data);
- 
+
     if (id && body) {
         let problem = undefined;
         try {
@@ -188,28 +190,28 @@ exports.Update = async (req, res) => {
         // console.log(problem)
         if (problem) {
             let score = 0;
-            if(body.level==1){
-                score=20;
+            if (body.level == 1) {
+                score = 20;
             }
-            if(body.level==2){
+            if (body.level == 2) {
                 score = 30;
             }
-            if(body.level==3){
+            if (body.level == 3) {
                 score = 50;
             }
             try {
-                problem.title= body.title;
-                problem.content= body.content;
-                problem.input= body.input;
-                problem.output= body.output;
-                problem.example.input= body.example.input;
-                problem.example.output= body.example.output;
-                problem.sortName= body.sortName;
-                problem.correctScore= score;
-                problem.level= body.level;
-                problem.timeLimit= body.timeLimit;
-                problem.memoryLimit= body.memoryLimit;
-                problem.language= body.language;
+                problem.title = body.title;
+                problem.content = body.content;
+                problem.input = body.input;
+                problem.output = body.output;
+                problem.example.input = body.example.input;
+                problem.example.output = body.example.output;
+                problem.sortName = body.sortName;
+                problem.correctScore = score;
+                problem.level = body.level;
+                problem.timeLimit = body.timeLimit;
+                problem.memoryLimit = body.memoryLimit;
+                problem.language = body.language;
                 let result = await problem.save();
                 res.json({
                     code: 1,
@@ -226,11 +228,69 @@ exports.Update = async (req, res) => {
         }
     }
 }
-exports.SubmitCode = async (req,res)=>{
-    console.log(req.file);
-    console.log(req.body);
 
+exports.SubmitCode = async (req, res) => {
+    //    let result = await submit(req.file.path,req.body.problemName);
+    let url = 'http://192.168.1.111/domjudge/api/submissions';
+    let auth = {
+        'user': 'dothang',
+        'pass': 'dothang',
+        'sendImmediately': true
+    };
+    let formData = {
+        shortname: req.body.problemName,
+        langid: 'cpp',
+        contest: 'demo',
+        'code[]': require('fs').createReadStream(req.file.path),
+    };
+    try {
+        let numId = await request.post({
+            auth: auth,
+            url: url,
+            formData: formData
+        });
+        let time = 0;
+        let interval = setInterval(async () => {
+            let result = JSON.parse(await getResult(numId));
+            if (result.length != 0) {
+                console.log(result)
+                clearInterval(interval);
+                await User.findOne({
+                    studentId: req.decoded.studentId
+                }).then(user => {
+                    Play.findById(user.playId).populate('history.problems.problemId').then(play => {
+                        play.history.problems.forEach(element => {
+                            if (element.problemId.sortName == req.body.problemName) {
+                                element.correct = true;
+                            }
+                        });
+                        play.save().then(playAfter => {
+                            res.json({
+                                code: 1,
+                                status: '200',
+                                data: playAfter.history.problems
+                            });
+                        })
+
+                    })
+                })
+                clearInterval(interval);
+            } else {
+                time++;
+                console.log('waiting for ..... ', numId, ' time:', time)
+            }
+        }, 1000)
+    } catch (err) {
+        console.log('submit error')
+        return res.json({
+            code: 1,
+            status: '400',
+            message: 'Submit thất bại'
+        });
+    }
 }
+
+
 async function getResult(submissionId) {
     let url = 'http://192.168.1.111/domjudge/api/judgings?cid=2&submitid=' + submissionId;
     let auth = {
@@ -241,17 +301,17 @@ async function getResult(submissionId) {
 
     try {
         let res = await request.get({
-            auth: auth, url: url
+            auth: auth,
+            url: url
         });
         return res;
-    }
-    catch (err) {
+    } catch (err) {
         console.log('EX: ');
         console.log(err);
     }
 }
 
-async function SubmitToServerDomjudge() {
+async function submit(path, problemName) {
     //    let url = 'http://localhost:3000';
     let url = 'http://192.168.1.111/domjudge/api/submissions';
     let auth = {
@@ -260,29 +320,30 @@ async function SubmitToServerDomjudge() {
         'sendImmediately': true
     };
     let formData = {
-        shortname: 'sum',
+        shortname: problemName,
         langid: 'cpp',
         contest: 'demo',
-        'code[]': require('fs').createReadStream('main.cpp'),
+        'code[]': require('fs').createReadStream(path),
     };
     try {
-        let res = await request.post({
-            auth: auth, url: url, formData: formData
+        let numId = await request.post({
+            auth: auth,
+            url: url,
+            formData: formData
         });
         let time = 0;
-        let interval = setInterval(async()=>{
-            console.log(res)
-            let result = JSON.parse(await getResult(res));
-            if(result.length!=0){
+        let interval = setInterval(async () => {
+            let result = JSON.parse(await getResult(numId));
+            if (result.length != 0) {
                 console.log(result)
+                return result;
                 clearInterval(interval);
-            }else{
+            } else {
                 time++;
-                console.log('waiting for ..... ',res,' time:',time)
+                console.log('waiting for ..... ', numId, ' time:', time)
             }
-        },1000)
-    }
-    catch (err) {
+        }, 1000)
+    } catch (err) {
         console.log('EX: ');
         console.log(err);
     }

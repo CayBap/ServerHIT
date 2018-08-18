@@ -11,5 +11,5 @@ router.get('/:id',auth,checkRole('admin'),ProblemController.GetProblemById);
 router.put('/:id',auth,checkRole('admin'),ProblemController.Update);
 router.delete('/:id',auth,checkRole('admin'),ProblemController.Delete);
 router.post('/',auth,checkRole('admin'),ProblemController.AddProblem);
-router.post('/submit',upload.uploadCode().single('file'),ProblemController.SubmitCode);
+router.post('/submit',auth,upload.uploadCode().single('file'),ProblemController.SubmitCode);
 module.exports = router;
