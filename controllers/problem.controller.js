@@ -104,6 +104,7 @@ exports.GetProblemById = async (req, res) => {
 
 exports.AddProblem = async (req, res) => {
     let body = JSON.parse(req.body.data);
+    console.log(body.example)
     if (body) {
         try {
             let score = 0;
@@ -117,7 +118,7 @@ exports.AddProblem = async (req, res) => {
                 score = 50;
             }
             // body = JSON.parse(body)
-            // console.log(body.example.input)
+            // console.log(body)
             let problem = new Problem({
                 title: body.title,
                 content: body.content,
@@ -175,7 +176,6 @@ exports.Delete = async (req, res) => {
 exports.Update = async (req, res) => {
     let id = req.params.id;
     let body = JSON.parse(req.body.data);
-
     if (id && body) {
         let problem = undefined;
         try {
@@ -249,6 +249,7 @@ exports.SubmitCode = async (req, res) => {
             url: url,
             formData: formData
         });
+        let correct = false;
         let time = 0;
         let interval = setInterval(async () => {
             let result = JSON.parse(await getResult(numId));
@@ -261,13 +262,20 @@ exports.SubmitCode = async (req, res) => {
                     Play.findById(user.playId).populate('history.problems.problemId').then(play => {
                         play.history.problems.forEach(element => {
                             if (element.problemId.sortName == req.body.problemName) {
-                                element.correct = true;
+                                if(result[0].outcome=='correct'){
+                                    element.correct = true;
+                                    correct = true;
+                                }else{
+                                    element.correct=false;
+                                }
+                                
                             }
                         });
                         play.save().then(playAfter => {
                             res.json({
                                 code: 1,
                                 status: '200',
+                                correct:correct,
                                 data: playAfter.history.problems
                             });
                         })
@@ -281,8 +289,10 @@ exports.SubmitCode = async (req, res) => {
             }
         }, 1000)
     } catch (err) {
+        // console.log(err)
         console.log('submit error')
         return res.json({
+            correct:false,
             code: 1,
             status: '400',
             message: 'Submit thất bại'
@@ -305,44 +315,6 @@ async function getResult(submissionId) {
             url: url
         });
         return res;
-    } catch (err) {
-        console.log('EX: ');
-        console.log(err);
-    }
-}
-
-async function submit(path, problemName) {
-    //    let url = 'http://localhost:3000';
-    let url = 'http://192.168.1.111/domjudge/api/submissions';
-    let auth = {
-        'user': 'dothang',
-        'pass': 'dothang',
-        'sendImmediately': true
-    };
-    let formData = {
-        shortname: problemName,
-        langid: 'cpp',
-        contest: 'demo',
-        'code[]': require('fs').createReadStream(path),
-    };
-    try {
-        let numId = await request.post({
-            auth: auth,
-            url: url,
-            formData: formData
-        });
-        let time = 0;
-        let interval = setInterval(async () => {
-            let result = JSON.parse(await getResult(numId));
-            if (result.length != 0) {
-                console.log(result)
-                return result;
-                clearInterval(interval);
-            } else {
-                time++;
-                console.log('waiting for ..... ', numId, ' time:', time)
-            }
-        }, 1000)
     } catch (err) {
         console.log('EX: ');
         console.log(err);

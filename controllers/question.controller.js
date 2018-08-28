@@ -120,31 +120,34 @@ exports.GetQuestionById = async (req, res) => {
 
 exports.AddQuestion = async (req, res) => {
     let body = req.body;
+    // console.log(req.body)
     if (body) {
         try {
+            // console.log(body.answered1)
             let question = new Question({
                 content: body.content,
                 isHtml: body.isHtml,
                 options: [{
                         numbering: 'A',
-                        answered: body.answered1
+                        answer: body.answered1
                     },
                     {
                         numbering: 'B',
-                        answered: body.answered2
+                        answer: body.answered2
                     },
                     {
                         numbering: 'C',
-                        answered: body.answered3
+                        answer: body.answered3
                     },
                     {
                         numbering: 'D',
-                        answered: body.answered4
+                        answer: body.answered4
                     }
                 ],
                 correctAnswer: body.correctAnswer,
                 score: body.score
             });
+            // console.log(question)
             let result = await question.save();
             res.json({
                 code: 1,

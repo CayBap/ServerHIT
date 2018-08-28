@@ -5,6 +5,7 @@ const saltRounds = 10;
 var config = require('config');
 //Dang ki
 exports.SignUp = (req, res) => {
+    console.log(req.body)
     if (req.body) {
         User.findOne({
             $or: [{ 'phone': req.body.phone }, { 'studentId': req.body.studentId }]
@@ -43,7 +44,7 @@ exports.SignUp = (req, res) => {
                         user: user
                     });
                 }).catch(err => {
-                    console.log(err);
+                    // console.log(err);
                     res.json({
                         code:2,
                         status: "400",

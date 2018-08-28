@@ -5,7 +5,7 @@ var config = require('config'); // get our config file
 module.exports = role => {
   return (req, res, next) => {
     let currentRole = req.decoded.role;
-    console.log(currentRole);
+    // console.log(currentRole);
     if (currentRole) {
       if (currentRole === role || currentRole === 'judge') {
         return next();

@@ -3,12 +3,20 @@ const QuestionList = require('../models/questionList.model');
 
 
 exports.GetListQuestions = async (req, res) => {
+    var page = req.query.page ? parseInt(req.query.page) : 1
+    var limit = req.query.limit ? parseInt(req.query.limit) : 10;
+
+    var options = {
+        page,
+        limit,
+    }
     try {
-        var questionList = await QuestionList.find();
+        var quesitonList = await QuestionList.paginate({}, options);
+        // console.log(problems.sortName)
         res.json({
             code: 1,
             status: "200",
-            data: questionList
+            data: quesitonList
         })
 
     } catch (e) {
@@ -16,7 +24,7 @@ exports.GetListQuestions = async (req, res) => {
         res.json({
             code: 2,
             status: "400",
-            message: "Lấy danh sách câu hỏi thất bại"
+            message: "Lấy  câu hỏi thất bại"
         })
     }
 }
