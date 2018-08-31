@@ -56,6 +56,7 @@ exports.GetProblems = async (req, res) => {
         })
     }
 }
+
 exports.GetQuestionsNotPage = async (req, res) => {
 
     try {
@@ -104,7 +105,6 @@ exports.GetProblemById = async (req, res) => {
 
 exports.AddProblem = async (req, res) => {
     let body = JSON.parse(req.body.data);
-    console.log(body.example)
     if (body) {
         try {
             let score = 0;

@@ -12,7 +12,6 @@ exports.GetListQuestions = async (req, res) => {
     }
     try {
         var quesitonList = await QuestionList.paginate({}, options);
-        // console.log(problems.sortName)
         res.json({
             code: 1,
             status: "200",
@@ -20,7 +19,6 @@ exports.GetListQuestions = async (req, res) => {
         })
 
     } catch (e) {
-        console.log(e)
         res.json({
             code: 2,
             status: "400",
@@ -69,9 +67,7 @@ exports.AddListQuestion = async (req, res) => {
     if (body) {
         try {
             let questions = [];
-    
                 if (body.questions) {
-
                     if (typeof body.questions == "string") {
                         let ques = await Question.findById(body.questions);
                         ques = {
@@ -92,8 +88,8 @@ exports.AddListQuestion = async (req, res) => {
 
                 }
             let listQuestion = new QuestionList({
-                name: body.name,
-                usingQuestion: body.usingQuestion,
+                name: body.questionList.name,
+                usingQuestion: body.questionList.usingQuestion,
                 questions: questions,
                 isRandom:body.isRandom
             });
@@ -149,9 +145,9 @@ exports.Update = async (req, res) => {
         }
         if (questionList) {
             try {
-                questionList.name = body.name;
-                questionList.usingQuestion = body.usingquestion;
-                questionList.isRandom = body.isRandom.toString();
+                questionList.name = body.questionList.name;
+                questionList.usingQuestion = body.questionList.usingQuestion;
+                // questionList.isRandom = body.isRandom.toString();
                 let questions = [];
     
                 if (body.questions) {
@@ -176,6 +172,7 @@ exports.Update = async (req, res) => {
 
                 }
                 questionList.questions = questions;
+                console.log(questionList)
                 let result = await questionList.save();
                 res.json({
                     code: 1,
@@ -183,7 +180,6 @@ exports.Update = async (req, res) => {
                     data: result
                 });
             } catch (err) {
-                console.log(err)
                 res.json({
                     code: 1,
                     status: '400',

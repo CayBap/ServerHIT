@@ -73,7 +73,6 @@ exports.GetQuestions = async (req, res) => {
     }
 }
 exports.GetQuestionsNotPage = async (req, res) => {
-
     try {
         var question = await Question.find();
         res.json({
