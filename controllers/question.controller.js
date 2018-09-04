@@ -128,22 +128,22 @@ exports.AddQuestion = async (req, res) => {
                 isHtml: body.isHtml,
                 options: [{
                         numbering: 'A',
-                        answer: body.answered1
+                        answer: body.answered1.trim()
                     },
                     {
                         numbering: 'B',
-                        answer: body.answered2
+                        answer: body.answered2.trim()
                     },
                     {
                         numbering: 'C',
-                        answer: body.answered3
+                        answer: body.answered3.trim()
                     },
                     {
                         numbering: 'D',
-                        answer: body.answered4
+                        answer: body.answered4.trim()
                     }
                 ],
-                correctAnswer: body.correctAnswer,
+                correctAnswer: body.correctAnswer.trim(),
                 score: body.score
             });
             // console.log(question)
@@ -205,11 +205,11 @@ exports.Update = async (req, res) => {
                 // question.image = body.image;
                 // question.video = body.video;
                 // questions.isHtml = body.isHtml;
-                question.options[0].answer = body.answered1;
-                question.options[1].answer = body.answered2;
-                question.options[2].answer = body.answered3;
-                question.options[3].answer = body.answered4;
-                question.correctAnswer = body.correctAnswer;
+                question.options[0].answer = body.answered1.trim();
+                question.options[1].answer = body.answered2.trim();
+                question.options[2].answer = body.answered3.trim();
+                question.options[3].answer = body.answered4.trim();
+                question.correctAnswer = body.correctAnswer.trim();
                 question.score = body.score;
                 let result = await question.save();
                 res.json({

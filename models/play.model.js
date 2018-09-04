@@ -47,14 +47,20 @@ const Play = new Schema(
       type: Number,
       default: 60 * 60
     },
-
+    comment:{
+        type:String,
+    },
     interviewScore: {
       type: Number,
       default: 0
     },
+    judgeName:String,
     isInterviewing: {
-      type: Boolean,
-      default: false
+      type: Number,
+      default: 0
+      //0 Chưa phrong vấn
+      //1 Đang phỏng vấn
+      //2 Đã phỏng vấn
     }
   },
   {

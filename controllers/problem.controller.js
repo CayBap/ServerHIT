@@ -254,7 +254,6 @@ exports.SubmitCode = async (req, res) => {
         let interval = setInterval(async () => {
             let result = JSON.parse(await getResult(numId));
             if (result.length != 0) {
-                console.log(result)
                 clearInterval(interval);
                 await User.findOne({
                     studentId: req.decoded.studentId

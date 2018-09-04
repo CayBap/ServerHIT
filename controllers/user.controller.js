@@ -142,6 +142,43 @@ exports.GetUsers =async (req,res)=>{
     }
 }
 
+exports.GetUserInter =async (req,res)=>{
+    var page = req.query.page ? parseInt(req.query.page) : 1
+    var limit = req.query.limit ?parseInt(req.query.limit): 10; 
+    let query  = {
+        role:'user'
+    };
+    
+    var options = {
+        page,
+        limit,
+        populate: 'playId' ,
+    }
+    try {
+        var users = await User.paginate(query, options);
+        // console.log(users)
+       users.docs =  users.docs.filter(item=>{
+            if(item.playId){
+                if(item.playId.isInterviewing==0||item.playId.isInterviewing==1)
+                    return true;
+            }
+        });
+        res.json({
+            code: 1,
+            status: "200",
+            data:users
+        })
+
+    } catch (e) {
+        console.log(e)
+       res.json({
+        code:2,
+        status: "400",
+        message: "Lấy người dùng thất bại"
+       })
+    }
+}
+
 exports.GetAdmins =async (req,res)=>{
     try {
         var users = await User.find({$or:[{role:'admin'},{role:'judge'}]});
